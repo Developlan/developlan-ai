@@ -1,0 +1,22 @@
+# Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+storage/
+backups/
+
+# Virtual environments
+.venv/
+venv/
+
+# OS
+.DS_Store
