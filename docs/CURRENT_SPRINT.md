@@ -19,6 +19,14 @@ Story 002.2 — Investigation Orchestrator: COMPLETE
 
 Story 002.3 — Investigation Memory: IN REVIEW
 
+Story 002.4 — Investigation Completion & Opportunity Handoff: PLANNED
+
+Story 002.5 — Supporting Document Acquisition: PLANNED
+
+Story 002.6 — Opportunity Intelligence Package: PLANNED
+
+Milestone M2 — End-to-End Investigation Demonstration: PLANNED
+
 ---
 
 # Objective
