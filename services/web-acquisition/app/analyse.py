@@ -3,7 +3,10 @@ from app.download import download_documents
 from app.extract import extract_documents
 from app.evidence import build_evidence_corpus
 from app.opportunity_intelligence import profile_opportunity
-from app.opportunity_detector import detect_page_type
+from app.investigate_page import (
+    extract_candidate_links,
+    investigate_page,
+)
 
 
 def analyse_opportunity(url: str):
@@ -14,31 +17,21 @@ def analyse_opportunity(url: str):
 
     package = acquire_opportunity(url)
 
-    page_type = detect_page_type(
-        package.webpage_text or ""
+    investigation = investigate_page(
+        package.webpage_text or "",
+        package.url,
+        extract_candidate_links(
+            package.url,
+            package.webpage_html,
+        ),
     )
 
-    if page_type == "portal":
-
-        from app.discover_from_portal import discover_from_portal
-        from app.navigation_intelligence import rank_navigation
-
-        discovery = discover_from_portal(
-            package.url,
-            package.webpage_html or "",
-        )
-
-        discovery.opportunities = rank_navigation(
-            discovery.opportunities
-        )
-
-        return discovery
-
-    if page_type != "opportunity":
+    if investigation.page_type != "opportunity":
 
         return {
-            "status": page_type,
+            "status": investigation.page_type,
             "package": package,
+            "investigation": investigation,
         }
 
     #
@@ -69,5 +62,6 @@ def analyse_opportunity(url: str):
 
     return {
         "package": package,
+        "investigation": investigation,
         "profile": profile,
     }
