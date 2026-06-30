@@ -1,12 +1,8 @@
-from app.acquire import acquire_opportunity
 from app.download import download_documents
 from app.extract import extract_documents
 from app.evidence import build_evidence_corpus
+from app.investigation_orchestrator import InvestigationOrchestrator
 from app.opportunity_intelligence import profile_opportunity
-from app.investigate_page import (
-    extract_candidate_links,
-    investigate_page,
-)
 
 
 def analyse_opportunity(url: str):
@@ -15,22 +11,14 @@ def analyse_opportunity(url: str):
     # Stage 1
     #
 
-    package = acquire_opportunity(url)
+    investigation = InvestigationOrchestrator().run(url)
+    package = investigation.latest_opportunity_package()
 
-    investigation = investigate_page(
-        package.webpage_text or "",
-        package.url,
-        extract_candidate_links(
-            package.url,
-            package.webpage_html,
-        ),
-    )
-
-    if investigation.page_type != "opportunity":
+    if package is None:
 
         return {
-            "status": investigation.page_type,
-            "package": package,
+            "status": investigation.status,
+            "package": investigation.latest_package(),
             "investigation": investigation,
         }
 
