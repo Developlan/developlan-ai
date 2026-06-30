@@ -24,6 +24,6 @@ Completed
 In Progress
 
 - AI Investigation Engine
-- Investigation Planner
+- Story 002.2 Investigation Orchestrator: added investigation lifecycle management, priority action queue, revisit prevention and configurable stop limits.
 - Recursive opportunity discovery
 - Authenticated portal support

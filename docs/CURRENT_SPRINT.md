@@ -13,6 +13,14 @@ AI Investigation Engine
 
 ---
 
+# Story Status
+
+Story 002.2 — Investigation Orchestrator: COMPLETE
+
+Story 002.3 — Investigation Memory: IN REVIEW
+
+---
+
 # Objective
 
 Transform the current acquisition engine into an intelligent investigation engine.
@@ -50,6 +58,8 @@ Implemented
 ✓ Listing detection
 
 ✓ Opportunity detection
+
+✓ Investigation Orchestrator
 
 ---
 

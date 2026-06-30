@@ -22,3 +22,27 @@ The engine should investigate a page, determine its type, identify promising nex
 
 Status:
 IN PROGRESS
+
+---
+
+## Story 002.2
+### Investigation Orchestrator
+
+### Objective
+
+Create an orchestration layer that manages an investigation lifecycle without performing business reasoning.
+
+Reasoning remains the responsibility of the AI Investigation Engine.
+
+### Success Criteria
+
+- Creates and returns an Investigation object.
+- Calls page acquisition and AI page investigation.
+- Maintains visited URLs.
+- Maintains candidate and completed actions.
+- Prioritises high, medium and low actions.
+- Prevents revisiting URLs.
+- Stops when evidence is complete, limits are reached or no actions remain.
+
+Status:
+COMPLETE

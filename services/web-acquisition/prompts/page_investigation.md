@@ -16,6 +16,7 @@ You will receive:
 
 - Page URL
 - Candidate links as structured anchor text and resolved URL pairs
+- Investigation memory summarising previous observations, active hypotheses and reasoning history
 - Rendered page text
 
 The rendered page text may include navigation labels, page headings, descriptions, opportunity titles, deadlines, donor language and visible link text.
@@ -23,6 +24,10 @@ The rendered page text may include navigation labels, page headings, description
 The candidate link inventory is the authoritative source for link URLs.
 
 Use exact URLs from the candidate link inventory when selecting next_actions or ignored_links.
+
+Use the investigation memory to understand what has already been observed, what remains plausible and what has already been reasoned.
+
+Do not repeat investigation paths that the memory shows are already exhausted.
 
 ## Investigation Questions
 

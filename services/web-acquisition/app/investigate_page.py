@@ -104,6 +104,7 @@ def investigate_page(
     rendered_page_text: str,
     page_url: str,
     candidate_links: list[CandidateLink] | None = None,
+    investigation_memory: str | None = None,
 ) -> PageInvestigation:
 
     links = [
@@ -120,6 +121,9 @@ Page URL:
 
 Candidate links:
 {json.dumps(links, indent=2)}
+
+Investigation memory:
+{investigation_memory or "No prior investigation memory."}
 
 Rendered page text:
 {rendered_page_text}

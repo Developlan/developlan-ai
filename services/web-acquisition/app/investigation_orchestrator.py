@@ -1,3 +1,5 @@
+import json
+from datetime import datetime, timezone
 from typing import Literal
 from urllib.parse import urldefrag
 from uuid import uuid4
@@ -25,6 +27,12 @@ InvestigationStatus = Literal[
     "max_pages_reached",
     "max_depth_reached",
     "no_candidate_actions",
+]
+
+HypothesisStatus = Literal[
+    "active",
+    "confirmed",
+    "rejected",
 ]
 
 
@@ -57,6 +65,20 @@ class InvestigationReasoning(BaseModel):
     reasoning: str
 
 
+class Observation(BaseModel):
+    source_url: str
+    page_type: str
+    summary: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Hypothesis(BaseModel):
+    statement: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    status: HypothesisStatus = "active"
+
+
 class Investigation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     start_url: str
@@ -65,6 +87,9 @@ class Investigation(BaseModel):
     candidate_actions: list[QueuedInvestigationAction] = Field(default_factory=list)
     completed_actions: list[CompletedInvestigationAction] = Field(default_factory=list)
     evidence: list[InvestigationEvidence] = Field(default_factory=list)
+    observations: list[Observation] = Field(default_factory=list)
+    hypotheses: list[Hypothesis] = Field(default_factory=list)
+    rejected_hypotheses: list[Hypothesis] = Field(default_factory=list)
     reasoning_history: list[InvestigationReasoning] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     evidence_complete: bool = False
@@ -84,6 +109,64 @@ class Investigation(BaseModel):
             return None
 
         return self.evidence[-1].package
+
+    def memory_summary(
+        self,
+        max_items: int = 5,
+    ) -> str:
+
+        active_hypotheses = [
+            hypothesis
+            for hypothesis in self.hypotheses
+            if hypothesis.status == "active"
+        ]
+
+        memory = {
+            "observations": [
+                {
+                    "source_url": observation.source_url,
+                    "page_type": observation.page_type,
+                    "summary": self._clip(observation.summary),
+                    "confidence": observation.confidence,
+                    "timestamp": observation.timestamp.isoformat(),
+                }
+                for observation in self.observations[-max_items:]
+            ],
+            "active_hypotheses": [
+                {
+                    "statement": self._clip(hypothesis.statement),
+                    "confidence": hypothesis.confidence,
+                    "status": hypothesis.status,
+                }
+                for hypothesis in active_hypotheses[-max_items:]
+            ],
+            "reasoning_history": [
+                {
+                    "url": reasoning.url,
+                    "reasoning": self._clip(reasoning.reasoning),
+                }
+                for reasoning in self.reasoning_history[-max_items:]
+            ],
+        }
+
+        if not any(memory.values()):
+            return "No prior investigation memory."
+
+        return json.dumps(
+            memory,
+            indent=2,
+        )
+
+    def _clip(
+        self,
+        value: str,
+        max_chars: int = 700,
+    ) -> str:
+
+        if len(value) <= max_chars:
+            return value
+
+        return value[:max_chars].rstrip() + "..."
 
 
 class InvestigationOrchestrator:
@@ -145,17 +228,17 @@ class InvestigationOrchestrator:
                     package.url,
                     package.webpage_html,
                 ),
+                investigation.memory_summary(),
             )
 
             investigation.visited_urls.append(page_url)
             investigation.confidence = page_investigation.confidence
             investigation.evidence_complete = page_investigation.evidence_complete
 
-            investigation.reasoning_history.append(
-                InvestigationReasoning(
-                    url=package.url,
-                    reasoning=page_investigation.reasoning,
-                )
+            self._record_memory(
+                investigation,
+                package.url,
+                page_investigation,
             )
 
             investigation.evidence.append(
@@ -246,6 +329,70 @@ class InvestigationOrchestrator:
             )
 
             existing_urls.add(url)
+
+    def _record_memory(
+        self,
+        investigation: Investigation,
+        source_url: str,
+        page_investigation,
+    ) -> None:
+
+        investigation.observations.append(
+            Observation(
+                source_url=source_url,
+                page_type=page_investigation.page_type,
+                summary=page_investigation.summary,
+                confidence=page_investigation.confidence,
+            )
+        )
+
+        investigation.reasoning_history.append(
+            InvestigationReasoning(
+                url=source_url,
+                reasoning=page_investigation.reasoning,
+            )
+        )
+
+        if (
+            page_investigation.evidence_complete
+            and page_investigation.page_type == "opportunity"
+        ):
+            investigation.hypotheses.append(
+                Hypothesis(
+                    statement=f"{source_url} contains sufficient opportunity evidence.",
+                    confidence=page_investigation.confidence,
+                    status="confirmed",
+                )
+            )
+            return
+
+        if page_investigation.evidence_complete:
+            investigation.rejected_hypotheses.append(
+                Hypothesis(
+                    statement=f"{source_url} does not provide a viable opportunity path.",
+                    confidence=page_investigation.confidence,
+                    status="rejected",
+                )
+            )
+            return
+
+        if page_investigation.next_actions:
+            investigation.hypotheses.append(
+                Hypothesis(
+                    statement=f"{source_url} may lead to useful opportunity evidence.",
+                    confidence=page_investigation.confidence,
+                    status="active",
+                )
+            )
+            return
+
+        investigation.rejected_hypotheses.append(
+            Hypothesis(
+                statement=f"{source_url} produced no actionable investigation links.",
+                confidence=page_investigation.confidence,
+                status="rejected",
+            )
+        )
 
     def _pop_next_action(
         self,
