@@ -16,11 +16,7 @@ def analyse_opportunity(url: str):
 
     if package is None:
 
-        return {
-            "status": investigation.status,
-            "package": investigation.latest_package(),
-            "investigation": investigation,
-        }
+        return investigation
 
     #
     # Stage 2

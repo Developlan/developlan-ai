@@ -23,6 +23,15 @@ InvestigationPriority = Literal[
 InvestigationStatus = Literal[
     "pending",
     "running",
+    "opportunity_found",
+    "evidence_complete",
+    "max_pages_reached",
+    "max_depth_reached",
+    "no_candidate_actions",
+]
+
+CompletionReason = Literal[
+    "opportunity_found",
     "evidence_complete",
     "max_pages_reached",
     "max_depth_reached",
@@ -93,6 +102,11 @@ class Investigation(BaseModel):
     reasoning_history: list[InvestigationReasoning] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     evidence_complete: bool = False
+    completion_reason: CompletionReason | None = None
+    opportunity_found: bool = False
+    opportunity_url: str | None = None
+    final_page_type: str | None = None
+    final_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
 
     def latest_opportunity_package(self) -> OpportunityPackage | None:
 
@@ -202,8 +216,10 @@ class InvestigationOrchestrator:
         while investigation.candidate_actions:
 
             if len(investigation.visited_urls) >= self.max_pages:
-                investigation.status = "max_pages_reached"
-                return investigation
+                return self._complete(
+                    investigation,
+                    "max_pages_reached",
+                )
 
             action = self._pop_next_action(investigation)
             url = self._normalise_url(action.url)
@@ -234,6 +250,8 @@ class InvestigationOrchestrator:
             investigation.visited_urls.append(page_url)
             investigation.confidence = page_investigation.confidence
             investigation.evidence_complete = page_investigation.evidence_complete
+            investigation.final_page_type = page_investigation.page_type
+            investigation.final_confidence = page_investigation.confidence
 
             self._record_memory(
                 investigation,
@@ -252,6 +270,10 @@ class InvestigationOrchestrator:
                 )
             )
 
+            if page_investigation.page_type == "opportunity":
+                investigation.opportunity_found = True
+                investigation.opportunity_url = package.url
+
             investigation.completed_actions.append(
                 CompletedInvestigationAction(
                     link_text=action.link_text,
@@ -266,13 +288,23 @@ class InvestigationOrchestrator:
                 )
             )
 
+            if page_investigation.page_type == "opportunity":
+                return self._complete(
+                    investigation,
+                    "opportunity_found",
+                )
+
             if page_investigation.evidence_complete:
-                investigation.status = "evidence_complete"
-                return investigation
+                return self._complete(
+                    investigation,
+                    "evidence_complete",
+                )
 
             if len(investigation.visited_urls) >= self.max_pages:
-                investigation.status = "max_pages_reached"
-                return investigation
+                return self._complete(
+                    investigation,
+                    "max_pages_reached",
+                )
 
             next_depth = action.depth + 1
 
@@ -291,9 +323,35 @@ class InvestigationOrchestrator:
             )
 
         if max_depth_reached:
-            investigation.status = "max_depth_reached"
+            return self._complete(
+                investigation,
+                "max_depth_reached",
+            )
         else:
-            investigation.status = "no_candidate_actions"
+            return self._complete(
+                investigation,
+                "no_candidate_actions",
+            )
+
+    def _complete(
+        self,
+        investigation: Investigation,
+        reason: CompletionReason,
+    ) -> Investigation:
+
+        investigation.status = reason
+        investigation.completion_reason = reason
+
+        if investigation.evidence:
+            final_evidence = investigation.evidence[-1]
+            investigation.final_page_type = final_evidence.page_type
+            investigation.final_confidence = final_evidence.confidence
+
+        opportunity_package = investigation.latest_opportunity_package()
+
+        if opportunity_package is not None:
+            investigation.opportunity_found = True
+            investigation.opportunity_url = opportunity_package.url
 
         return investigation
 
