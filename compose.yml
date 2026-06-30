@@ -1,0 +1,27 @@
+name: developlan-ai
+
+services:
+
+  web-acquisition:
+
+    build:
+      context: .
+      dockerfile: services/web-acquisition/Dockerfile
+
+    container_name: developlan-web-acquisition
+
+    env_file:
+      - services/web-acquisition/.env
+
+    ports:
+      - "8010:8000"
+
+    restart: unless-stopped
+
+    networks:
+      - developlan
+
+networks:
+
+  developlan:
+    driver: bridge
