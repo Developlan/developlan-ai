@@ -12,6 +12,10 @@ class OpportunityDocument(BaseModel):
 
     extracted_text: str | None = None
 
+    extraction_status: str | None = None
+
+    extraction_note: str | None = None
+
 
 class OpportunityPackage(BaseModel):
     url: str

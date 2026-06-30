@@ -20,3 +20,4 @@ playwright
 pymupdf
 python-docx
 openpyxl
+xlrd
