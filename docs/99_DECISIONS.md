@@ -39,3 +39,13 @@ Complete file replacement.
 Reason
 
 Replacing entire files during development is faster, more reliable and less error-prone than incremental edits.
+
+---
+
+## D005
+
+Structured domain models before report rendering.
+
+Reason
+
+Opportunity intelligence should be generated as reusable domain objects before being rendered into Markdown or any future output format. This keeps AI generation focused on structured intelligence and allows Google Docs, PDF, HTML or JSON renderers to be introduced without changing the underlying reasoning logic.

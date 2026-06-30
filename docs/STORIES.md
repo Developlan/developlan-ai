@@ -181,11 +181,11 @@ PLANNED
 ---
 
 ## Story 002.6
-### Opportunity Intelligence Package
+### Opportunity Brief & Opportunity Intelligence Package
 
 ### Objective
 
-Produce a structured Opportunity Intelligence package from the discovered opportunity and its supporting evidence.
+Produce both a concise factual Opportunity Brief and a deeper Opportunity Intelligence Package from the same Investigation and Evidence Corpus.
 
 ### Inputs
 
@@ -196,21 +196,85 @@ Produce a structured Opportunity Intelligence package from the discovered opport
 
 ### Outputs
 
-- Structured opportunity profile
-- Investigation summary
-- Evidence summary
-- Unknowns and risks identified by the existing intelligence engine
+- Opportunity Brief for rapid business development review
+- Opportunity Intelligence Package for deeper analytical understanding
+- Shared investigation summary
+- Shared evidence summary
+- Explicit unknowns and risks identified from the evidence corpus
+
+### Implementation Rule
+
+The AI must first populate structured domain models. Do not generate reports directly.
+
+Conceptual Models:
+
+- OpportunityBrief
+- OpportunityIntelligence
+
+The first implementation may render these models as Markdown.
+
+Future renderers, including Google Docs, PDF, HTML and JSON, should be possible without changing the AI generation logic.
+
+This is a design constraint only.
+
+### Opportunity Brief
+
+Purpose:
+Provide a concise factual briefing suitable for rapid business development review.
+
+Target Reading Time:
+2 minutes.
+
+Suggested Sections:
+
+- Opportunity Snapshot
+- Client
+- Services / Scope
+- Key Dates
+- Geography
+- Submission Requirements
+- Required Qualifications
+- Required Experience
+- Supporting Documents
+- Investigation Confidence
+
+The Brief should contain facts wherever possible. Unknowns must remain explicit.
+
+### Opportunity Intelligence Package
+
+Purpose:
+Provide a deeper analytical understanding of the opportunity.
+
+Target Reading Time:
+10–15 minutes.
+
+Suggested Sections:
+
+- Executive Summary
+- Investigation Summary
+- Evidence Summary
+- Opportunity Characteristics
+- Risks & Unknowns
+- Supporting Evidence Inventory
+- Investigation Metadata
+
+This output may contain AI synthesis, but must distinguish inferred information from factual information.
 
 ### Acceptance Criteria
 
-- The final analyse response contains the investigation, opportunity package and structured profile.
-- The profile is generated from the full available evidence corpus.
-- The output is suitable for executive opportunity review.
+- The final analyse response contains the investigation, opportunity package, Opportunity Brief and Opportunity Intelligence Package.
+- Both outputs are generated from the same Investigation and Evidence Corpus.
+- The Opportunity Brief is concise and does not duplicate long narrative from the Intelligence Package.
+- The Opportunity Brief is suitable for rapid business development review.
+- The Opportunity Intelligence Package is suitable for deeper opportunity understanding.
+- Inferred information is distinguished from factual information in the Intelligence Package.
 - Unknowns remain explicit rather than guessed.
 - No capability matching or bid recommendation is introduced.
 
 ### Out Of Scope
 
+- Capability matching
+- Bid/no-bid recommendations
 - Strategic assessment
 - Organisation-specific fit analysis
 - Consortium recommendations

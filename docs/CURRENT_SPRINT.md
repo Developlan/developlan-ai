@@ -23,7 +23,7 @@ Story 002.4 — Investigation Completion & Opportunity Handoff: PLANNED
 
 Story 002.5 — Supporting Document Acquisition: PLANNED
 
-Story 002.6 — Opportunity Intelligence Package: PLANNED
+Story 002.6 — Opportunity Brief & Opportunity Intelligence Package: PLANNED
 
 Milestone M2 — End-to-End Investigation Demonstration: PLANNED
 
